@@ -101,8 +101,13 @@ class Game2048:
                                 p3 = p3 * 2
                                 p4 = 0
                         elif (not p3 > 0) and p4 > 0:
-                            p3 = p4
-                            p4 = 0
+                            if p2 == p4:
+                                p2 = p2 * 2
+                                p3 = 0
+                                p4 = 0
+                            else:
+                                p3 = p4
+                                p4 = 0
             elif p1 > 0:
                 if p3 > 0:
                     if p1 == p3:
