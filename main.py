@@ -1,7 +1,9 @@
 import copy
 import json
+import logging
 from typing import Dict, Union
 
+from aiohttp import ClientSession
 from khl import Bot, Message, MessageTypes, EventTypes, Event, api, User
 from khl.card import Element, Types, CardMessage, Card, Module
 
@@ -245,6 +247,14 @@ def failed_message(user: Union[User, str, None], message: str) -> CardMessage:
     card.append(Module.Section(Element.Text((f'(met){user}(met) ' if user is not None else "") + f'{message}', type=Types.Text.KMD)))
     card_message.append(card)
     return card_message
+
+
+@bot.task.add_interval(minutes=30)
+async def task():
+    async with ClientSession() as session:
+        session.headers.add('uuid', config.get('bot-market'))
+        async with session.post("http://bot.gekj.net/api/v1/online.bot") as response:
+            logging.debug((await response.json())['msg'])
 
 
 if __name__ == "__main__":
