@@ -25,6 +25,7 @@ up = Element.Button("↑", theme=Types.Theme.PRIMARY, click=Types.Click.RETURN_V
 down = Element.Button("↓", theme=Types.Theme.PRIMARY, click=Types.Click.RETURN_VAL, value='2048_down')
 left = Element.Button("←", theme=Types.Theme.PRIMARY, click=Types.Click.RETURN_VAL, value='2048_left')
 right = Element.Button("→", theme=Types.Theme.PRIMARY, click=Types.Click.RETURN_VAL, value='2048_right')
+stop = Element.Button("不玩了", theme=Types.Theme.DANGER, click=Types.Click.RETURN_VAL, value='2048_stop')
 
 
 def operator_button(button: Element.Button, value: str) -> Element.Button:
@@ -76,10 +77,38 @@ def game_card_message(game: Game2048) -> CardMessage:
             action_groups[3],
             Module.Divider(),
             Module.ActionGroup(
-                left, up, right, down
+                value_none, up, value_none
+            ),
+            Module.ActionGroup(
+                left, stop, right
+            ),
+            Module.ActionGroup(
+                value_none, down, value_none
             ),
             Module.Context(Element.Text("由 DeeChael 开发,  在 [Github](https://github.com/DeeChael/LetsPlay2048) 查看源码", type=Types.Text.KMD)),
             theme=Types.Theme.PRIMARY
+        )
+    )
+    return card_message
+
+
+def game_card_message_stopped(game: Game2048) -> CardMessage:
+    card_message = CardMessage()
+    action_groups = list()
+    for x in range(4):
+        action_group = Module.ActionGroup()
+        for y in range(4):
+            action_group.append(value_button(game.field[x][y]))
+        action_groups.append(action_group)
+    card_message.append(
+        Card(
+            action_groups[0],
+            action_groups[1],
+            action_groups[2],
+            action_groups[3],
+            Module.Divider(),
+            Module.Context(Element.Text("由 DeeChael 开发,  在 [Github](https://github.com/DeeChael/LetsPlay2048) 查看源码", type=Types.Text.KMD)),
+            theme=Types.Theme.WARNING
         )
     )
     return card_message
@@ -146,7 +175,7 @@ async def play2048(msg: Message, *args):
 @bot.on_event(EventTypes.MESSAGE_BTN_CLICK)
 async def button_clicked(b: Bot, event: Event):
     value = str(event.extra['body']['value'])
-    if value in ['2048_up', '2048_down', '2048_left', '2048_right']:
+    if value in ['2048_up', '2048_down', '2048_left', '2048_right', '2048_stop']:
         user_id = event.extra['body']['user_id']
         msg_id = event.extra['body']['msg_id']
         channel_id = event.extra['body']['target_id']
@@ -162,11 +191,18 @@ async def button_clicked(b: Bot, event: Event):
                 game.move_left()
             elif value == "2048_right":
                 game.move_right()
+            elif value == '2048_stop':
+                await update_message(msg_id, game_card_message_stopped(game))
+                await bot.client.gate.exec_req(
+                    api.Message.create(type=10, target_id=channel_id, content=json.dumps(primary_message(user_id, "你停止了游玩"))))
+                return
             if game.has_2048():
+                stored_games.pop(msg_id)
                 await update_message(msg_id, game_card_message_success(game))
                 await bot.client.gate.exec_req(
                     api.Message.create(type=10, target_id=channel_id, content=json.dumps(success_message(user_id, "你成功获得了2048！"))))
             elif not game.can_go_on():
+                stored_games.pop(msg_id)
                 await update_message(msg_id, game_card_message_failed(game))
                 await bot.client.gate.exec_req(
                     api.Message.create(type=10, target_id=channel_id, content=json.dumps(success_message(user_id, "很抱歉，你失败了！"))))
