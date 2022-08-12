@@ -200,6 +200,7 @@ async def button_clicked(b: Bot, event: Event):
                 return
             if game.has_2048():
                 stored_games.pop(msg_id)
+                print(f"User {user_id} completed 2048!")
                 await update_message(msg_id, game_card_message_success(game))
                 await bot.client.gate.exec_req(
                     api.Message.create(type=10, target_id=channel_id, content=json.dumps(success_message(user_id, "你成功获得了2048！"))))
@@ -207,7 +208,7 @@ async def button_clicked(b: Bot, event: Event):
                 stored_games.pop(msg_id)
                 await update_message(msg_id, game_card_message_failed(game))
                 await bot.client.gate.exec_req(
-                    api.Message.create(type=10, target_id=channel_id, content=json.dumps(success_message(user_id, "很抱歉，你失败了！"))))
+                    api.Message.create(type=10, target_id=channel_id, content=json.dumps(failed_message(user_id, "很抱歉，你失败了！"))))
             else:
                 await update_message(msg_id, game_card_message(game))
 
