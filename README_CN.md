@@ -1,6 +1,4 @@
 <h1 align="center">来玩2048吧！</h1>
-
----
 <h3 align="center">
   <a href="./README.md">English</a> | 简体中文
 </h3>

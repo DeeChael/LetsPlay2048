@@ -1,6 +1,4 @@
 <h1 align="center">Let's Play 2048!</h1>
-
----
 <h3 align="center">
   English | <a href="./README_CN.md">简体中文</a>
 </h3>
