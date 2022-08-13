@@ -30,7 +30,7 @@ right = Element.Button("→", theme=Types.Theme.PRIMARY, click=Types.Click.RETUR
 stop = Element.Button("不玩了", theme=Types.Theme.DANGER, click=Types.Click.RETURN_VAL, value='2048_stop')
 
 tictactoe_circle = Element.Button("⭕", theme=Types.Theme.SUCCESS)
-tictactoe_cross = Element.Button("×", theme=Types.Theme.DANGER)
+tictactoe_cross = Element.Button("❌", theme=Types.Theme.DANGER)
 
 
 def tictactoe_unclicked(position: int):
@@ -179,7 +179,7 @@ def tictactoe_card_message(game: GameTicTacToe) -> CardMessage:
             elif value == 2:
                 action_group.append(tictactoe_cross)
             else:
-                action_group.append(tictactoe_unclicked(x * 3 + y))
+                action_group.append(tictactoe_unclicked(x * 3 + y + 1))
         action_groups.append(action_group)
     card_message.append(
         Card(
@@ -187,6 +187,7 @@ def tictactoe_card_message(game: GameTicTacToe) -> CardMessage:
             action_groups[1],
             action_groups[2],
             Module.Divider(),
+            Module.Section(Element.Text(f"轮到 (met){game.circle if game.turn == 1 else game.cross}(met) 了！", type=Types.Text.KMD)),
             Module.Context(Element.Text("由 DeeChael 开发,  在 [Github](https://github.com/DeeChael/LetsPlay2048) 查看源码", type=Types.Text.KMD)),
             theme=Types.Theme.PRIMARY
         )
@@ -258,7 +259,7 @@ async def play2048(msg: Message, *args):
     print(f"用户 {msg.author.username}({msg.author_id}) 正在游玩2048")
 
 
-@bot.command(regex="(.|/|。){1}(玩|来玩|play){0,1}(井字棋|ttt|tictactoe|ticktacktoe){1}")
+@bot.command(name="ttt", prefixes=['.', '。', '/'])
 async def play_tic_tac_toe(msg: Message, competitor: str = None, *args):
     if competitor is None:
         await msg.reply(failed_message(msg.author_id, '请输入你的对手！'), type=MessageTypes.CARD, is_temp=True)
@@ -328,16 +329,16 @@ async def button_clicked(b: Bot, event: Event):
         user_id = event.extra['body']['user_id']
         msg_id = event.extra['body']['msg_id']
         channel_id = event.extra['body']['target_id']
-        if msg_id in stored_games:
+        if msg_id in stored_tic_tac_toe:
             game = stored_tic_tac_toe[msg_id]
             if not (game.cross == user_id or game.circle == user_id):
                 return
             if game.turn == 1 and not user_id == game.circle:
                 return
             if game.turn == 1:
-                game.set_circle(position)
+                game.set_circle(position - 1)
             else:
-                game.set_cross(position)
+                game.set_cross(position - 1)
             if game.is_end():
                 if game.has_winner():
                     if game.get_winner() == 1:
@@ -352,6 +353,8 @@ async def button_clicked(b: Bot, event: Event):
                         await update_message(msg_id, tictactoe_card_message_end(game, f"胜者是 (met){game.circle}(met)！"))
                     else:
                         await update_message(msg_id, tictactoe_card_message_end(game, f"胜者是 (met){game.cross}(met)！"))
+                else:
+                    await update_message(msg_id, tictactoe_card_message(game))
 
 
 async def update_message(msg_id: str, card_message: CardMessage):
