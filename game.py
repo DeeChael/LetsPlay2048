@@ -208,6 +208,40 @@ class Game2048:
         self.rotate_right()
         self.rotate_right()
 
+    def can_move_left(self) -> bool:
+        for x in range(4):
+            p1 = self.field[x][0]
+            p2 = self.field[x][1]
+            p3 = self.field[x][2]
+            p4 = self.field[x][3]
+            if p1 == 0:
+                return p2 != 0 or p3 != 0 or p4 != 0
+            elif p2 == 0:
+                return p3 != 0 or p4 != 0
+            elif p3 == 0:
+                return p4 != 0
+        return False
+
+    def can_move_up(self) -> bool:
+        self.rotate_left()
+        result = self.can_move_left()
+        self.rotate_right()
+        return result
+
+    def can_move_down(self) -> bool:
+        self.rotate_right()
+        result = self.can_move_left()
+        self.rotate_left()
+        return result
+
+    def can_move_right(self) -> bool:
+        self.rotate_left()
+        self.rotate_left()
+        result = self.can_move_left()
+        self.rotate_right()
+        self.rotate_right()
+        return result
+
     def rotate_left(self):
         new_field = dict()
         for x in range(0, 4):
@@ -257,3 +291,98 @@ class Game2048:
                 if self.field[x][y] == 2048:
                     return True
         return False
+
+
+class GameTicTacToe:
+    field: Dict[int, Dict[int, int]] = dict()
+    circle: str
+    cross: str
+    turn: int = 1
+
+    def __init__(self, circle: str, cross: str):
+        self.circle = circle
+        self.cross = cross
+        for x in range(0, 3):
+            self.field[x] = dict()
+            for y in range(0, 3):
+                self.field[x][y] = 0
+
+    def has_winner(self) -> bool:
+        p1 = self.field[0][0]
+        p2 = self.field[0][1]
+        p3 = self.field[0][2]
+        p4 = self.field[1][0]
+        p5 = self.field[1][1]
+        p6 = self.field[1][2]
+        p7 = self.field[2][0]
+        p8 = self.field[2][1]
+        p9 = self.field[2][2]
+        if p1 == p2 == p3:
+            return p1 == 1 or p1 == 2
+        if p4 == p5 == p6:
+            return p4 == 1 or p4 == 2
+        if p7 == p8 == p9:
+            return p7 == 1 or p7 == 2
+        if p1 == p4 == p7:
+            return p1 == 1 or p1 == 2
+        if p2 == p5 == p8:
+            return p2 == 1 or p2 == 2
+        if p3 == p6 == p9:
+            return p3 == 1 or p3 == 2
+        if p1 == p5 == p9:
+            return p1 == 1 or p1 == 2
+        if p3 == p5 == p7:
+            return p3 == 1 or p3 == 2
+        return False
+
+    def is_end(self) -> bool:
+        for x in range(0, 3):
+            for y in range(0, 3):
+                if self.field[x][y] == 0:
+                    return False
+        return True
+
+    def get_winner(self) -> int:
+        p1 = self.field[0][0]
+        p2 = self.field[0][1]
+        p3 = self.field[0][2]
+        p4 = self.field[1][0]
+        p5 = self.field[1][1]
+        p6 = self.field[1][2]
+        p7 = self.field[2][0]
+        p8 = self.field[2][1]
+        p9 = self.field[2][2]
+        if p1 == p2 == p3 > 0:
+            return p1
+        if p4 == p5 == p6 > 0:
+            return p4
+        if p7 == p8 == p9 > 0:
+            return p7
+        if p1 == p4 == p7 > 0:
+            return p1
+        if p2 == p5 == p8 > 0:
+            return p2
+        if p3 == p6 == p9 > 0:
+            return p3
+        if p1 == p5 == p9 > 0:
+            return p1
+        if p3 == p5 == p7 > 0:
+            return p3
+        return 0
+
+    def set_circle(self, position: int):
+        x = position // 3
+        y = position - (3 * (position // 3))
+        self.field[x][y] = 1
+        self.turn = 2
+
+    def set_cross(self, position: int):
+        x = position // 3
+        y = position - (3 * (position // 3))
+        self.field[x][y] = 2
+        self.turn = 1
+
+    def next_clicker(self) -> int:
+        return self.turn
+
+
