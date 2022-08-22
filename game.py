@@ -1,3 +1,4 @@
+from enum import IntEnum
 from random import choice, randrange
 from typing import Dict, Tuple, Union
 
@@ -384,5 +385,60 @@ class GameTicTacToe:
 
     def next_clicker(self) -> int:
         return self.turn
+
+
+class GameFiveInRow:
+    field: Dict[int, Dict[int, int]] = dict()
+
+    def __init__(self):
+        for x in range(0, 19):
+            for y in range(0, 19):
+                self.field[x][y] = 0
+
+    def has_winner(self):
+
+        ...
+
+
+class ChineseChessPiecesType(IntEnum):
+    NONE = 0
+    SHUAI = 11
+    JIANG = 12
+    BING = 101
+    ZU = 102
+    PAO_RED = 111
+    PAO_BLACK = 112
+    JU_RED = 121
+    JU_BLACK = 122
+    MA_RED = 131
+    MA_BLACK = 132
+    XIANG_RED = 141
+    XIANG_BLACK = 142
+    SHI_RED = 151
+    SHI_BLACK = 152
+
+
+class ChineseChessPieces:
+    type: ChineseChessPiecesType
+    x: int
+    y: int
+
+    def __init__(self, type: ChineseChessPiecesType, x: int, y: int):
+        self.type = type
+
+    def can_go_to(self, dx: int, dy: int) -> bool:
+        ...
+
+
+class GameChineseChess:
+    field: Dict[int, Dict[int, ChineseChessPieces]] = dict()
+
+    def __init__(self):
+        for x in range(0, 9):
+            for y in range(0, 9):
+                self.field[x][y] = ChineseChessPieces(ChineseChessPiecesType.NONE, x, y)
+
+    def can_go_to(self, ox, oy, dx, dy):
+        ...
 
 

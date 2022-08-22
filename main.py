@@ -331,9 +331,15 @@ async def button_clicked(b: Bot, event: Event):
         channel_id = event.extra['body']['target_id']
         if msg_id in stored_tic_tac_toe:
             game = stored_tic_tac_toe[msg_id]
+            print(f"cross: {game.cross}")
+            print(f"circle: {game.circle}")
+            print(f"clicker: {user_id}")
+            print(f"game: {game.turn}")
+            print(f"position: {position}")
             if not (game.cross == user_id or game.circle == user_id):
                 return
-            if game.turn == 1 and not user_id == game.circle:
+            if (game.turn == 1 and user_id != game.circle) or (game.turn == 2 and user_id != game.cross):
+                print("Turn is 1 and uid is not circle, should return")
                 return
             if game.turn == 1:
                 game.set_circle(position - 1)
